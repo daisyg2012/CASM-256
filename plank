@@ -1,0 +1,17 @@
+## initial plank model -- to be shelled and edited
+
+import cadquery as cq
+
+
+# Dimensions in mm
+vinyl_thickness = 38.1     # height (Y)
+plank_width = 3048         # length (X)
+plank_depth = 139.7        # depth (Z)
+
+# Create the vinyl plank
+plank = (
+    cq.Workplane("XY")
+    .box(plank_width, plank_depth, vinyl_thickness)
+)
+
+show_object(plank)
