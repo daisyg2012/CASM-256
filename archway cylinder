@@ -1,0 +1,33 @@
+import cadquery as cq
+
+## FR4 attenae, green and yellow design
+
+
+outer_radius = 20
+height = 50
+
+# cyl
+cyl = (
+    cq.Workplane("XY")
+    .circle(outer_radius)
+    .extrude(height)
+)
+
+
+arch_radius = 8   # radius of the arch cutout
+arch_width = 16   # width of the arch opening
+
+# creating an arch
+arch = (
+    cq.Workplane("XZ")
+    .center(0, 0)  # center of the cylinder
+    .moveTo(-arch_width/2, 0)
+    .threePointArc((0, arch_radius), (arch_width/2, 0))  # half-circle arch
+    .close()
+    .extrude(outer_radius)  # extrude through the whole cylinder
+)
+
+# cut arch out
+result = cyl.cut(arch)
+
+show_object(result)
