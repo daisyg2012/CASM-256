@@ -1,0 +1,21 @@
+# Hollowed out cylinder -- eight total
+
+# Dimensions (in mm)
+outer_radius = 3
+height = 2
+wall_thickness = 1.0
+
+# cylinder to be placed around the rectangle supports
+cyl = (
+    cq.Workplane("XY")
+    .circle(outer_radius)
+    .extrude(height)
+)
+
+# Hollow it out with shell
+cyl = (
+    cyl.faces(">Z or <Z")  #faces positive Z dir and negative Z dir
+    .shell(-wall_thickness) #shell out 1mm
+)
+
+show_object(cyl)
