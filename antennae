@@ -1,9 +1,11 @@
-# Hollowed out cylinder -- eight total
+import cadquery as cq
+
+## FR4 attenae, green and yellow design
 
 # Dimensions (in mm)
-outer_radius = 3
-height = 2
-wall_thickness = 1.0
+outer_radius = 0.4
+height = 0.4
+wall_thickness = 0.1
 
 # cylinder to be placed around the rectangle supports
 cyl = (
@@ -17,5 +19,26 @@ cyl = (
     cyl.faces(">Z or <Z")  #faces positive Z dir and negative Z dir
     .shell(-wall_thickness) #shell out 1mm
 )
+## show_object(cyl)
 
-show_object(cyl)
+
+## Dimensions (in mm)
+width_c = 5
+depth_c = 0.4
+height_c = 1
+
+connector =(
+    cq.Workplane("XY")
+    .box(height_c, width_c, depth_c)
+    )
+## show_object(connector)
+
+antenna_assy_base = (
+    cq.Assembly()
+    .add(connector, name = "connector", color= cq.Color("gray"))
+    .add(cyl, loc=cq.Location(0.76,-2.1,-0.2), name ="cylinder", color=cq.Color("gray"))
+    .add(cyl, loc=cq.Location(-0.76, -2.1, -0.2), name = "cylinder2", color= cq.Color("gray"))
+    )
+
+
+show_object(antenna_assy_base)
