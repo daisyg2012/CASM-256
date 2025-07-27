@@ -1,11 +1,8 @@
 import cadquery as cq
 
-## FR4 attenae, green and yellow design
 
-
-# --- Cylinder ---
-outer_radius = 15
-height = 50
+outer_radius = 1.8   
+height = 4         
 
 cyl = (
     cq.Workplane("XY")
@@ -13,26 +10,25 @@ cyl = (
     .extrude(height)
 )
 
-# archway
 def make_arch_door(wall, length, width, height, floor_height):
     bottom = wall.faces("-Z").val()
 
-  # makes rectangle box
+    #initial box shape
     cutout = (cq.Workplane(bottom.Center())
               .box(length, width, height)
               .translate((0, 0, (height/2)+floor_height))
               )
 
-    # fillet to make arch
-    cutout = cutout.faces("Z").edges("Y").fillet((length/2)-0.5)
+    # fillet top edges to make archway
+    cutout = cutout.faces("Z").edges("Y").fillet((length/2)-0.05)
 
     return wall.cut(cutout)
 
-# arch dimensions TBD
-arch_length = 10          
-arch_width = outer_radius * 2.5   
-arch_height = 12          
-floor_height = 0         
+
+arch_length = outer_radius * 0.8      
+arch_width = outer_radius * 2.2       
+arch_height = height * 0.6            
+floor_height = 0
 
 cyl_with_tunnel = make_arch_door(cyl, arch_length, arch_width, arch_height, floor_height)
 
