@@ -3,6 +3,7 @@ import cadquery as cq
 ## FR4 attenae, green and yellow design
 
 # Dimensions (in mm)
+
 outer_radius = 0.3
 height = 0.4
 wall_thickness = 0.095
@@ -14,7 +15,7 @@ cyl = (
     .extrude(height)
 )
 
-# Hollow it out with shell
+# hollow it out with shell
 cyl = (
     cyl.faces(">Z or <Z")  #faces positive Z dir and negative Z dir
     .shell(-wall_thickness) #shell out 1mm
@@ -31,14 +32,36 @@ connector =(
     cq.Workplane("XY")
     .box(height_c, width_c, depth_c)
     )
+
+
 ## show_object(connector)
 
 antenna_assy_base = (
     cq.Assembly()
-    .add(connector, name = "connector", color= cq.Color("gray"))
-    .add(cyl, loc=cq.Location(0.65,-2.25,-0.2), name ="cylinder", color=cq.Color("gray"))
-    .add(cyl, loc=cq.Location(-0.65, -2.25, -0.2), name = "cylinder2", color= cq.Color("gray"))
+    .add(connector, loc=cq.Location(0,-3.5,0), name = "connector", color= cq.Color("gray"))
+    .add(cyl, loc=cq.Location(0.65,-5.75,-0.2), name ="cylinder", color=cq.Color("gray"))
+    .add(cyl, loc=cq.Location(-0.65, -5.75, -0.2), name = "cylinder2", color= cq.Color("gray"))
+    )
+
+antenna_assy_base2 = (
+    cq.Assembly()
+    .add(connector, loc=cq.Location(0,3.5,0), name = "connector", color= cq.Color("gray"))
+    .add(cyl, loc=cq.Location(0.65,5.75,-0.2), name ="cylinder", color=cq.Color("gray"))
+    .add(cyl, loc=cq.Location(-0.65, 5.75, -0.2), name = "cylinder2", color= cq.Color("gray"))
     )
 
 
+
 show_object(antenna_assy_base)
+show_object(antenna_assy_base2)
+
+#duplicating the assembly to rotate it
+final_assy = cq.Assembly()
+
+# rotate 90 degrees about z axis
+final_assy.add(antenna_assy_base, loc=cq.Location(cq.Vector(0,0,0), cq.Vector(0,0,1), 90), name="base_rotated1")
+
+# rotate 90 degrees about z axis
+final_assy.add(antenna_assy_base2, loc=cq.Location(cq.Vector(0,0,0), cq.Vector(0,0,1), 90), name="base_rotated2")
+
+show_object(final_assy)
