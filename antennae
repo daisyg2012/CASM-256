@@ -2,17 +2,49 @@ import cadquery as cq
 
 ## FR4 attenae, green and yellow design
 
-# Dimensions (in mm)
+import cadquery as cq
 
-outer_radius = 0.3
-height = 0.4
-wall_thickness = 0.095
 
-# cylinder to be placed around the rectangle supports
-cyl = (
+outer_radius = 1.1   
+height = 4         
+
+cyla = (
     cq.Workplane("XY")
     .circle(outer_radius)
     .extrude(height)
+)
+
+def make_arch_door(wall, length, width, height, floor_height):
+    bottom = wall.faces("-Z").val()
+
+    #initial box shape
+    cutout = (cq.Workplane(bottom.Center())
+              .box(length, width, height)
+              .translate((0, 0, (height/2)+floor_height))
+              )
+
+    # fillet top edges to make archway
+    cutout = cutout.faces("Z").edges("Y").fillet((length/2)-0.05)
+
+    return wall.cut(cutout)
+
+
+arch_length = outer_radius * 0.8      
+arch_width = outer_radius * 2.2       
+arch_height = height * 0.4            
+floor_height = 0
+
+cyl_with_tunnel = make_arch_door(cyla, arch_length, arch_width, arch_height, floor_height)
+
+outer_radius2 = 0.3
+height2 = 0.4
+wall_thickness = 0.095
+
+#
+cyl = (
+    cq.Workplane("XY")
+    .circle(outer_radius2)
+    .extrude(height2)
 )
 
 # hollow it out with shell
@@ -23,7 +55,7 @@ cyl = (
 ## show_object(cyl)
 
 
-## Dimensions (in mm)
+
 width_c = 5
 depth_c = 0.4
 height_c = 0.8
@@ -50,8 +82,12 @@ antenna_assy_base2 = (
     .add(cyl, loc=cq.Location(-0.65, 5.75, -0.2), name = "cylinder2", color= cq.Color("gray"))
     )
 
+antenna_cylinder= (
+    cq.Assembly()
+    .add(cyl_with_tunnel, loc=cq.Location(cq.Vector(0,0,-0.2), cq.Vector(0,0,1), 45), name = "archcyl", color= cq.Color("gray"))
+    )
 
-
+show_object(antenna_cylinder)
 show_object(antenna_assy_base)
 show_object(antenna_assy_base2)
 
