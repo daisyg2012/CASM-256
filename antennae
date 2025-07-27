@@ -1,12 +1,5 @@
-import cadquery as cq
-
-## FR4 attenae, green and yellow design
-
-import cadquery as cq
-
-
 outer_radius = 1.1   
-height = 4         
+height = 3         
 
 cyla = (
     cq.Workplane("XY")
@@ -70,21 +63,21 @@ connector =(
 
 antenna_assy_base = (
     cq.Assembly()
-    .add(connector, loc=cq.Location(0,-3.5,0), name = "connector", color= cq.Color("gray"))
-    .add(cyl, loc=cq.Location(0.65,-5.75,-0.2), name ="cylinder", color=cq.Color("gray"))
-    .add(cyl, loc=cq.Location(-0.65, -5.75, -0.2), name = "cylinder2", color= cq.Color("gray"))
+    .add(connector, loc=cq.Location(0,-3.5,0), name = "connector", color= cq.Color("gray42"))
+    .add(cyl, loc=cq.Location(0.65,-5.75,-0.2), name ="cylinder", color=cq.Color("gray42"))
+    .add(cyl, loc=cq.Location(-0.65, -5.75, -0.2), name = "cylinder2", color= cq.Color("gray42"))
     )
 
 antenna_assy_base2 = (
     cq.Assembly()
-    .add(connector, loc=cq.Location(0,3.5,0), name = "connector", color= cq.Color("gray"))
-    .add(cyl, loc=cq.Location(0.65,5.75,-0.2), name ="cylinder", color=cq.Color("gray"))
-    .add(cyl, loc=cq.Location(-0.65, 5.75, -0.2), name = "cylinder2", color= cq.Color("gray"))
+    .add(connector, loc=cq.Location(0,3.5,0), name = "connector", color= cq.Color("gray42"))
+    .add(cyl, loc=cq.Location(0.65,5.75,-0.2), name ="cylinder", color=cq.Color("gray42"))
+    .add(cyl, loc=cq.Location(-0.65, 5.75, -0.2), name = "cylinder2", color= cq.Color("gray42"))
     )
 
 antenna_cylinder= (
     cq.Assembly()
-    .add(cyl_with_tunnel, loc=cq.Location(cq.Vector(0,0,-0.2), cq.Vector(0,0,1), 45), name = "archcyl", color= cq.Color("gray"))
+    .add(cyl_with_tunnel, loc=cq.Location(cq.Vector(0,0,-0.2), cq.Vector(0,0,1), 45), name = "archcyl", color= cq.Color("gray42"))
     )
 
 show_object(antenna_cylinder)
@@ -96,6 +89,36 @@ final_assy = cq.Assembly()
 
 # rotate 90 degrees about z axis
 final_assy.add(antenna_assy_base, loc=cq.Location(cq.Vector(0,0,0), cq.Vector(0,0,1), 90), name="base_rotated1")
+
+# rotate 90 degrees about z axis
+final_assy.add(antenna_assy_base2, loc=cq.Location(cq.Vector(0,0,0), cq.Vector(0,0,1), 90), name="base_rotated2")
+
+show_object(final_assy)
+
+cylb = (
+    cq.Workplane("XY")
+    .circle(outer_radius*0.9)
+    .extrude(height*1.5)
+)
+
+assy = (
+        cq.Assembly()
+        .add(cylb, loc = cq.Location(0,0,2.8), name= "cool", color = cq.Color("gray"))
+        )
+
+show_object(assy)
+
+cylc = (
+    cq.Workplane("XY")
+    .circle(1.1)
+    .extrude(2)
+)
+
+assy2 = (
+        cq.Assembly()
+        .add(cylc, loc = cq.Location(0,0,7.3), name= "cool", color = cq.Color("gray42"))
+        )
+show_object(assy2)
 
 # rotate 90 degrees about z axis
 final_assy.add(antenna_assy_base2, loc=cq.Location(cq.Vector(0,0,0), cq.Vector(0,0,1), 90), name="base_rotated2")
