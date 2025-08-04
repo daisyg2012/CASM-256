@@ -1,11 +1,51 @@
-outer_radius = 1.1   
-height = 3         
+import cadquery as cq
 
-cyla = (
+def make_connector():
+    # the connectors at the bottom of the antenna
+    base_cyl_radius = 5
+    base_cyl_height = 5
+    base_cyl_wall_thickness = 2
+
+    cyl = (
     cq.Workplane("XY")
-    .circle(outer_radius)
-    .extrude(height)
-)
+    .circle(base_cyl_radius)
+    .extrude(base_cyl_height)
+    )
+
+    base_cyl = (
+    cyl.faces(">Z or <Z")  #faces positive Z dir and negative Z dir
+    .shell(-base_cyl_wall_thickness) #shell out 1mm
+    )
+
+    width_c = 105
+    depth_c = 5
+    height_c = 12
+
+    connector =(
+    cq.Workplane("XY")
+    .box(height_c, width_c, depth_c)
+    )
+    
+    base_assy = cq.Assembly()
+  
+    base_assy.add(connector, name = "rect", color = cq.Color("gray59"))
+    base_assy.add(
+        base_cyl,
+        name="cyl1",
+        color=cq.Color("gray59"),
+        loc=cq.Location(-height_c*0.8, (width_c / 2)*0.91, -base_cyl_height / 2),
+    
+    )
+
+    base_assy.add(
+        base_cyl,
+        name="cyl2",
+        color=cq.Color("gray59"),
+        loc=cq.Location(height_c*0.8, (width_c / 2)*0.91, -base_cyl_height / 2),
+
+    )
+    
+    return base_assy
 
 def make_arch_door(wall, length, width, height, floor_height):
     bottom = wall.faces("-Z").val()
@@ -21,106 +61,77 @@ def make_arch_door(wall, length, width, height, floor_height):
 
     return wall.cut(cutout)
 
-
-arch_length = outer_radius * 0.8      
-arch_width = outer_radius * 2.2       
-arch_height = height * 0.4            
-floor_height = 0
-
-cyl_with_tunnel = make_arch_door(cyla, arch_length, arch_width, arch_height, floor_height)
-
-outer_radius2 = 0.3
-height2 = 0.4
-wall_thickness = 0.095
-
-#
-cyl = (
+def make_tunneled_cyl():
+    
+    outer_radius = 20.5   
+    height = 60  
+    #make the cylinder
+    cyla = (
     cq.Workplane("XY")
-    .circle(outer_radius2)
-    .extrude(height2)
-)
+    .circle(outer_radius)
+    .extrude(height)
+    )
+    arch_length = outer_radius * 0.8      
+    arch_width = outer_radius * 2.2       
+    arch_height = height * 0.4            
+    floor_height = 0
 
-# hollow it out with shell
-cyl = (
-    cyl.faces(">Z or <Z")  #faces positive Z dir and negative Z dir
-    .shell(-wall_thickness) #shell out 1mm
-)
-## show_object(cyl)
+    cyl_with_tunnel = make_arch_door(cyla, arch_length, arch_width, arch_height, floor_height)
+    
+    return cyl_with_tunnel
 
 
 
-width_c = 5
-depth_c = 0.4
-height_c = 0.8
-
-connector =(
+def make_base():
+    # 4 connectors and archtunnel
+    final_assy = cq.Assembly()
+    final_assy.add(make_connector(), loc=cq.Location(cq.Vector(-70,0,2.5), cq.Vector(0,0,1), 90), name="base_rotated1")
+    final_assy.add(make_connector(), loc=cq.Location(cq.Vector(0,-70,2.5), cq.Vector(0,0,1), 180), name="base_rotated2")
+    final_assy.add(make_connector(), loc=cq.Location(cq.Vector(70,0,2.5), cq.Vector(0,0,1), 270), name="base_rotated3")
+    final_assy.add(make_connector(), loc=cq.Location(cq.Vector(0,70,2.5), cq.Vector(0,0,1), 0), name="base_rotated4")
+    final_assy.add(make_tunneled_cyl(), loc=cq.Location(cq.Vector(0,0,-0.2), cq.Vector(0,0,1), 45), name = "archcyl", color= cq.Color("gray59"))
+    
+    outer_radius = 17   
+    height = 70
+    
+    cyla = (
     cq.Workplane("XY")
-    .box(height_c, width_c, depth_c)
-    )
-
-
-## show_object(connector)
-
-antenna_assy_base = (
-    cq.Assembly()
-    .add(connector, loc=cq.Location(0,-3.5,0), name = "connector", color= cq.Color("gray42"))
-    .add(cyl, loc=cq.Location(0.65,-5.75,-0.2), name ="cylinder", color=cq.Color("gray42"))
-    .add(cyl, loc=cq.Location(-0.65, -5.75, -0.2), name = "cylinder2", color= cq.Color("gray42"))
-    )
-
-antenna_assy_base2 = (
-    cq.Assembly()
-    .add(connector, loc=cq.Location(0,3.5,0), name = "connector", color= cq.Color("gray42"))
-    .add(cyl, loc=cq.Location(0.65,5.75,-0.2), name ="cylinder", color=cq.Color("gray42"))
-    .add(cyl, loc=cq.Location(-0.65, 5.75, -0.2), name = "cylinder2", color= cq.Color("gray42"))
-    )
-
-antenna_cylinder= (
-    cq.Assembly()
-    .add(cyl_with_tunnel, loc=cq.Location(cq.Vector(0,0,-0.2), cq.Vector(0,0,1), 45), name = "archcyl", color= cq.Color("gray42"))
-    )
-
-show_object(antenna_cylinder)
-show_object(antenna_assy_base)
-show_object(antenna_assy_base2)
-
-#duplicating the assembly to rotate it
-final_assy = cq.Assembly()
-
-# rotate 90 degrees about z axis
-final_assy.add(antenna_assy_base, loc=cq.Location(cq.Vector(0,0,0), cq.Vector(0,0,1), 90), name="base_rotated1")
-
-# rotate 90 degrees about z axis
-final_assy.add(antenna_assy_base2, loc=cq.Location(cq.Vector(0,0,0), cq.Vector(0,0,1), 90), name="base_rotated2")
-
-show_object(final_assy)
-
-cylb = (
-    cq.Workplane("XY")
-    .circle(outer_radius*0.9)
-    .extrude(height*1.5)
+    .circle(outer_radius)
+    .extrude(height)
 )
+    cylb = (
+    cq.Workplane("XY")
+    .circle(20.5)
+    .extrude(height*0.5)
+)
+    final_assy.add(cyla, loc=cq.Location(0,0,60), name = "secondcyl", color= cq.Color("gray"))
+    final_assy.add(cylb, loc=cq.Location(0,0,130), name = "thirdcyl", color= cq.Color("gray52"))
+    return final_assy
 
-assy = (
-        cq.Assembly()
-        .add(cylb, loc = cq.Location(0,0,2.8), name= "cool", color = cq.Color("gray"))
+def make_top():
+    box_green = (
+       cq.Workplane("XY")
+       .box(340,340,1.6)
+       )
+
+    box_white = (
+        cq.Workplane("XY")
+        .box(10,690,1.6)
         )
 
-show_object(assy)
 
-cylc = (
-    cq.Workplane("XY")
-    .circle(1.1)
-    .extrude(2)
-)
+    assy_antenna_top = (
+    cq.Assembly()
+    .add(box_green, loc = cq.Location(175,175,165), name="br", color = cq.Color("green4"))
+    .add(box_green, loc = cq.Location(-175,175,165), name="bL", color = cq.Color("green4"))
+    .add(box_green, loc = cq.Location(175,-175,165), name="tr", color = cq.Color("green4"))
+    .add(box_green, loc = cq.Location(-175,-175,165), name="tl", color = cq.Color("green4"))
+    .add(box_white,loc = cq.Location(0,0,165), name = "strip", color=cq.Color("khaki"))
+    .add(box_white, loc = cq.Location(cq.Vector(0,0,165), cq.Vector(0,0,1),90), name = "strip2", color=cq.Color("khaki"))
+    )
 
-assy2 = (
-        cq.Assembly()
-        .add(cylc, loc = cq.Location(0,0,7.3), name= "cool", color = cq.Color("gray42"))
-        )
-show_object(assy2)
+    return assy_antenna_top
 
-# rotate 90 degrees about z axis
-final_assy.add(antenna_assy_base2, loc=cq.Location(cq.Vector(0,0,0), cq.Vector(0,0,1), 90), name="base_rotated2")
 
-show_object(final_assy)
+show_object(make_base())
+show_object(make_top())
