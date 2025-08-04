@@ -1,0 +1,22 @@
+box_green = (
+       cq.Workplane("XY")
+       .box(340,340,0.1)
+       )
+
+box_white = (
+        cq.Workplane("XY")
+        .box(10,698,0.1)
+        )
+
+
+assy_antenna_top = (
+    cq.Assembly()
+    .add(box_green, loc = cq.Location(175,175,9.3), name="br", color = cq.Color("green4"))
+    .add(box_green, loc = cq.Location(-175,175,9.3), name="bL", color = cq.Color("green4"))
+    .add(box_green, loc = cq.Location(175,-175,9.3), name="tr", color = cq.Color("green4"))
+    .add(box_green, loc = cq.Location(-175,-175,9.3), name="tl", color = cq.Color("green4"))
+    .add(box_white,loc = cq.Location(0,0,9.3), name = "strip", color=cq.Color("khaki"))
+    .add(box_white, loc = cq.Location(cq.Vector(0,0,9.3), cq.Vector(0,0,1),90), name = "strip2", color=cq.Color("khaki"))
+    )
+
+show_object(assy_antenna_top)
