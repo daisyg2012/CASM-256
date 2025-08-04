@@ -1,11 +1,11 @@
 box_green = (
        cq.Workplane("XY")
-       .box(340,340,0.1)
+       .box(340,340,1.6)
        )
 
 box_white = (
         cq.Workplane("XY")
-        .box(10,698,0.1)
+        .box(10,698,1.6)
         )
 
 
