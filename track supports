@@ -1,0 +1,51 @@
+import cadquery as cq
+from math import sin, cos, pi
+
+def bolt():
+    #creds to eddie liberato on github -- will replace soon with a proper anchor bolt
+    lenght = 32
+    minor_diameter = 18.0
+    pitch = 4.9
+
+    pts = []
+
+    for t in range(lenght):
+        x = minor_diameter/2*cos(t)
+        y = minor_diameter/2*sin(t)
+        z = pitch/(2*pi)*t           # helix lenght
+        pts.append([x,y,z])
+
+    path = cq.Workplane("XY").spline(pts).wire()
+    thread = cq.Workplane("XZ").move(minor_diameter/2, 0).line(3.2, 0.5).line(0,1.0).line(-3.2, 0.5).close().sweep(path, isFrenet=True)
+
+    foot = cq.Workplane("XY").circle(18.5/2.0).extrude(26.0) .\
+    faces("<Z").workplane().circle(25.0/2.0).extrude(5.0) .\
+    faces("<Z").workplane().polygon(8, 35.0).extrude(7.0) .\
+    faces("<Z").workplane().hole(14.0, 42.0).translate((0,0,pitch/2.0))
+
+    foot = foot.union(thread)
+    
+    return foot
+
+
+
+def track_supports():
+
+    platform =(
+    cq.Workplane("XY")
+    .box(100,180,2)
+    ) 
+    assy = (
+        cq.Assembly()
+        .add(platform, name = "platform", color = cq.Color("darkorange4"))
+        .add(bolt(), name =  "bolt1", loc = cq.Location(25,65,8), color = cq.Color("darkorange4"))
+        .add(bolt(), name =  "bolt2",loc = cq.Location(25,-65,8), color = cq.Color("darkorange4"))
+        .add(bolt(), name =  "bolt3",loc = cq.Location(-25,65,8), color = cq.Color("darkorange4"))
+        .add(bolt(), name =  "bolt4",loc = cq.Location(-25,-65,8), color = cq.Color("darkorange4"))
+        )
+    
+    
+    
+    return assy
+
+show_object(track_supports())
