@@ -1,17 +1,24 @@
-## initial plank model -- to be shelled and edited
-
 import cadquery as cq
 
 
-# Dimensions in mm
-vinyl_thickness = 38.1     # height (Y)
-plank_width = 3048         # length (X)
-plank_depth = 139.7        # depth (Z)
+def plank():
+    vinyl_thickness = 38.1
+    plank_width = 3048
+    plank_depth = 139.7
 
-# Create the vinyl plank
-plank = (
+
+    plank = (
     cq.Workplane("XY")
     .box(plank_width, plank_depth, vinyl_thickness)
-)
+    )
 
-show_object(plank)
+    return plank
+
+# each plank is separated by roughly 50cm
+
+plank_series = cq.Assembly()
+
+for i in range(43):
+    y_pos = i * 500
+    
+    plank_series.add(plank(),loc=cq.Location(cq.Vector(0, y_pos, 0)), color = cq.Color("goldenrod4"))
