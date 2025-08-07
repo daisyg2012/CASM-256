@@ -92,3 +92,42 @@ for i in range(43):
     plank_series.add(plank(),loc=cq.Location(cq.Vector(1524, (y_pos-10500), 450)), color = cq.Color("goldenrod4"))
     
 show_object(plank_series)
+
+
+width = 3048       
+length = 22000     
+wire_thickness = 2
+wire_height = 1.5
+
+
+num_vertical = 151 
+
+spacing = (width - wire_thickness) / (num_vertical - 1)
+
+num_horizontal = int((length - wire_thickness) / spacing) + 1
+
+length = (num_horizontal - 1) * spacing + wire_thickness
+
+def make_horizontal_wire():
+    return cq.Workplane("XY").box(width, wire_thickness, wire_height)
+
+def make_vertical_wire():
+    return cq.Workplane("XY").box(wire_thickness, length, wire_height)
+
+mesh = cq.Assembly()
+
+# horizontal)
+for i in range(num_horizontal):
+    y_pos = -length / 2 + i * spacing
+    mesh.add(make_horizontal_wire(),
+             loc=cq.Location(cq.Vector(1524, y_pos, 430)),
+             color=cq.Color("red"))
+
+#  vertical
+for j in range(num_vertical):
+    x_pos = -width / 2 + j * spacing
+    mesh.add(make_vertical_wire(),
+             loc=cq.Location(cq.Vector(x_pos + 1524, 0, 430)),
+             color=cq.Color("red"))
+
+show_object(mesh)
