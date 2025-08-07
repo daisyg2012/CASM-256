@@ -89,7 +89,7 @@ plank_series = cq.Assembly()
 for i in range(43):
     y_pos = i * 500
     
-    plank_series.add(plank(),loc=cq.Location(cq.Vector(1524, (y_pos-10500), 450)), color = cq.Color("goldenrod4"))
+    plank_series.add(plank(),loc=cq.Location(cq.Vector(1524, (y_pos-10500), 470)), color = cq.Color("goldenrod4"))
     
 show_object(plank_series)
 
