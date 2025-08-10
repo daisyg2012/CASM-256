@@ -36,24 +36,24 @@ def track_supports():
     ) 
     assy = (
         cq.Assembly()
-        .add(platform, name = "platform", color = cq.Color("darkorange4"))
-        .add(bolt(), name =  "bolt1", loc = cq.Location(320,180,23), color = cq.Color("darkorange4"))
-        .add(bolt(), name =  "bolt2",loc = cq.Location(-320,180,23), color = cq.Color("darkorange4"))
-        .add(bolt(), name =  "bolt3",loc = cq.Location(320,-180,23), color = cq.Color("darkorange4"))
-        .add(bolt(), name =  "bolt4",loc = cq.Location(-320,-180,23), color = cq.Color("darkorange4"))
+        .add(platform, name = "platform", color = cq.Color("tan4"))
+        .add(bolt(), name =  "bolt1", loc = cq.Location(320,180,23), color = cq.Color("tan4"))
+        .add(bolt(), name =  "bolt2",loc = cq.Location(-320,180,23), color = cq.Color("tan4"))
+        .add(bolt(), name =  "bolt3",loc = cq.Location(320,-180,23), color = cq.Color("tan4"))
+        .add(bolt(), name =  "bolt4",loc = cq.Location(-320,-180,23), color = cq.Color("tan4"))
         )
     
     
     
     return assy
 
-show_object(track_supports())
+
 
 def train_tracks():
     
     train_track = (
     cq.Workplane("XY")
-    .box(500,22000,450)
+    .box(360,22000,450)
     .edges("|Y")  # edges parallel to X (horizontal in front/back)
     .filter(lambda e: e.startPoint().z > 9.9)
     .fillet(90)
@@ -61,8 +61,8 @@ def train_tracks():
     
     tracks = (
     cq.Assembly()
-    .add(train_track,loc = cq.Location(0,0,225), color = cq.Color("darkorange4"))
-    .add(train_track,loc = cq.Location(3048,0,225),color = cq.Color("darkorange4"))
+    .add(train_track,loc = cq.Location(0,0,225), color = cq.Color("tan4"))
+    .add(train_track,loc = cq.Location(3048,0,225),color = cq.Color("tan4"))
     )
     return tracks
 
@@ -88,7 +88,7 @@ plank_series = cq.Assembly()
 for i in range(43):
     y_pos = i * 500
     
-    plank_series.add(plank(),loc=cq.Location(cq.Vector(1524, (y_pos-10500), 470)), color = cq.Color("goldenrod4"))
+    plank_series.add(plank(),loc=cq.Location(cq.Vector(1524, (y_pos-10500), 470)), color = cq.Color("navajowhite4"))
     
 show_object(plank_series)
 
@@ -119,14 +119,29 @@ mesh = cq.Assembly()
 for i in range(num_horizontal):
     y_pos = -length / 2 + i * spacing
     mesh.add(make_horizontal_wire(),
-             loc=cq.Location(cq.Vector(1524, y_pos, 430)),
-             color=cq.Color("red"))
+             loc=cq.Location(cq.Vector(1524, y_pos, 410)),
+             color=cq.Color("gray"))
 
 #  vertical
 for j in range(num_vertical):
     x_pos = -width / 2 + j * spacing
     mesh.add(make_vertical_wire(),
-             loc=cq.Location(cq.Vector(x_pos + 1524, 0, 430)),
-             color=cq.Color("red"))
+             loc=cq.Location(cq.Vector(x_pos + 1524, 0, 410)),
+             color=cq.Color("gray"))
 
 show_object(mesh)
+
+track_supp = cq.Assembly()
+
+for k in range(5):
+    track_supp.add(track_supports(),
+    loc=cq.Location(0,2500 * k,0))
+    track_supp.add(track_supports(),
+    loc=cq.Location(3048,2500 * k,0))
+    track_supp.add(track_supports(),
+    loc=cq.Location(0,2500 * k * -1,0))
+    track_supp.add(track_supports(),
+    loc=cq.Location(3048,2500 * k * -1,0))
+    
+    
+show_object(track_supp)
