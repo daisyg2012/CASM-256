@@ -3,24 +3,23 @@ from math import sin, cos, pi
 
 def bolt():
     #creds to eddie liberato on github -- will replace soon with a proper anchor bolt
-    lenght = 32
-    minor_diameter = 18.0
-    pitch = 4.9
+    length = 32 * 2
+    minor_diameter = 15.0 * 2
+    pitch = 4.9 * 2
 
     pts = []
 
-    for t in range(lenght):
-        x = minor_diameter/2*cos(t)
-        y = minor_diameter/2*sin(t)
-        z = pitch/(2*pi)*t           # helix lenght
+    for i in range(length):
+        x = minor_diameter/2*cos(i)
+        y = minor_diameter/2*sin(i)
+        z = pitch/(2*pi)*i
         pts.append([x,y,z])
 
     path = cq.Workplane("XY").spline(pts).wire()
-    thread = cq.Workplane("XZ").move(minor_diameter/2, 0).line(3.2, 0.5).line(0,1.0).line(-3.2, 0.5).close().sweep(path, isFrenet=True)
+    thread = cq.Workplane("XZ").move(minor_diameter, 0).line(6.4, 1).line(0,2.0).line(-6.4, 1).close().sweep(path, isFrenet=True)
 
-    foot = cq.Workplane("XY").circle(18.5/2.0).extrude(26.0) .\
-    faces("<Z").workplane().circle(25.0/2.0).extrude(5.0) .\
-    faces("<Z").workplane().polygon(8, 35.0).extrude(7.0) .\
+    foot = cq.Workplane("XY").circle(28).extrude(100.0) .\
+    faces("<Z").workplane().polygon(6,92.0).extrude(30.0) .\
     faces("<Z").workplane().hole(14.0, 42.0).translate((0,0,pitch/2.0))
 
     foot = foot.union(thread)
@@ -38,10 +37,10 @@ def track_supports():
     assy = (
         cq.Assembly()
         .add(platform, name = "platform", color = cq.Color("darkorange4"))
-        .add(bolt(), name =  "bolt1", loc = cq.Location(370,200,8), color = cq.Color("darkorange4"))
-        .add(bolt(), name =  "bolt2",loc = cq.Location(-370,200,8), color = cq.Color("darkorange4"))
-        .add(bolt(), name =  "bolt3",loc = cq.Location(370,-200,8), color = cq.Color("darkorange4"))
-        .add(bolt(), name =  "bolt4",loc = cq.Location(-370,-200,8), color = cq.Color("darkorange4"))
+        .add(bolt(), name =  "bolt1", loc = cq.Location(320,180,23), color = cq.Color("darkorange4"))
+        .add(bolt(), name =  "bolt2",loc = cq.Location(-320,180,23), color = cq.Color("darkorange4"))
+        .add(bolt(), name =  "bolt3",loc = cq.Location(320,-180,23), color = cq.Color("darkorange4"))
+        .add(bolt(), name =  "bolt4",loc = cq.Location(-320,-180,23), color = cq.Color("darkorange4"))
         )
     
     
