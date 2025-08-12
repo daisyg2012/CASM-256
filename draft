@@ -70,7 +70,7 @@ show_object(train_tracks())
 
 def plank():
     vinyl_thickness = 38.1
-    plank_width = 3050
+    plank_width = 3048
     plank_depth = 139.7
 
 
@@ -83,14 +83,6 @@ def plank():
 
 # each plank is separated by roughly 50cm
 
-plank_series = cq.Assembly()
-
-for i in range(43):
-    y_pos = i * 500
-    
-    plank_series.add(plank(),loc=cq.Location(cq.Vector(1524, (y_pos-10500), 470)), color = cq.Color("navajowhite4"))
-    
-show_object(plank_series)
 
 
 width = 3048       
@@ -163,7 +155,7 @@ def make_connector():
     .shell(-base_cyl_wall_thickness) #shell out 1mm
     )
 
-    width_c = 60
+    width_c = 40
     depth_c = 5
     height_c = 12
 
@@ -231,10 +223,10 @@ def make_tunneled_cyl():
 def make_base():
     # 4 connectors and archtunnel
     final_assy = cq.Assembly()
-    final_assy.add(make_connector(), loc=cq.Location(cq.Vector(-50,0,2.5), cq.Vector(0,0,1), 90), name="base_rotated1")
-    final_assy.add(make_connector(), loc=cq.Location(cq.Vector(0,-50,2.5), cq.Vector(0,0,1), 180), name="base_rotated2")
-    final_assy.add(make_connector(), loc=cq.Location(cq.Vector(50,0,2.5), cq.Vector(0,0,1), 270), name="base_rotated3")
-    final_assy.add(make_connector(), loc=cq.Location(cq.Vector(0,50,2.5), cq.Vector(0,0,1), 0), name="base_rotated4")
+    final_assy.add(make_connector(), loc=cq.Location(cq.Vector(-40,0,2.5), cq.Vector(0,0,1), 90), name="base_rotated1")
+    final_assy.add(make_connector(), loc=cq.Location(cq.Vector(0,-40,2.5), cq.Vector(0,0,1), 180), name="base_rotated2")
+    final_assy.add(make_connector(), loc=cq.Location(cq.Vector(40,0,2.5), cq.Vector(0,0,1), 270), name="base_rotated3")
+    final_assy.add(make_connector(), loc=cq.Location(cq.Vector(0,40,2.5), cq.Vector(0,0,1), 0), name="base_rotated4")
     final_assy.add(make_tunneled_cyl(), loc=cq.Location(cq.Vector(0,0,-0.2), cq.Vector(0,0,1), 45), name = "archcyl", color= cq.Color("gray59"))
     
     outer_radius = 17   
@@ -257,21 +249,21 @@ def make_base():
 def make_top():
     box_green = (
        cq.Workplane("XY")
-       .box(340,340,1.6)
+       .box(180,180,1.6)
        )
 
     box_white = (
         cq.Workplane("XY")
-        .box(10,690,1.6)
+        .box(10,350,1.6)
         )
 
 
     assy_antenna_top = (
     cq.Assembly()
-    .add(box_green, loc = cq.Location(175,175,165), name="br", color = cq.Color("green4"))
-    .add(box_green, loc = cq.Location(-175,175,165), name="bL", color = cq.Color("green4"))
-    .add(box_green, loc = cq.Location(175,-175,165), name="tr", color = cq.Color("green4"))
-    .add(box_green, loc = cq.Location(-175,-175,165), name="tl", color = cq.Color("green4"))
+    .add(box_green, loc = cq.Location(85,85,165), name="br", color = cq.Color("green4"))
+    .add(box_green, loc = cq.Location(-85,85,165), name="bL", color = cq.Color("green4"))
+    .add(box_green, loc = cq.Location(85,-85,165), name="tr", color = cq.Color("green4"))
+    .add(box_green, loc = cq.Location(-85,-85,165), name="tl", color = cq.Color("green4"))
     .add(box_white,loc = cq.Location(0,0,165), name = "strip", color=cq.Color("khaki"))
     .add(box_white, loc = cq.Location(cq.Vector(0,0,165), cq.Vector(0,0,1),90), name = "strip2", color=cq.Color("khaki"))
     )
@@ -286,3 +278,21 @@ def make_antennae():
     .add(make_base())
     )
     return assy
+
+def plank_antennae():
+    
+    assy = cq.Assembly()
+    assy.add(plank(),loc=cq.Location(cq.Vector(0,0, 220)), color = cq.Color("navajowhite4"))
+    n = 6
+    plank_w = 3048
+    box_w = 360
+    gap = (plank_w - n*box_w) / (n + 1)
+    spacing = box_w + gap  # center-to-center spacing
+
+    init_x = -plank_w/2 + gap + box_w/2
+    for i in range(n):
+        x = init_x + i * spacing
+        assy.add(make_antennae(), loc=cq.Location(cq.Vector(x,0,240)))
+    return assy
+
+show_object(plank_antennae())
