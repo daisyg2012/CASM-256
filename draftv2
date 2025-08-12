@@ -1,0 +1,305 @@
+import cadquery as cq
+from math import sin, cos, pi
+
+def bolt():
+
+    length = 32 * 2
+    minor_diameter = 15.0 * 2
+    pitch = 4.9 * 2
+
+    pts = []
+
+    for i in range(length):
+        x = minor_diameter/2*cos(i)
+        y = minor_diameter/2*sin(i)
+        z = pitch/(2*pi)*i
+        pts.append([x,y,z])
+
+    path = cq.Workplane("XY").spline(pts).wire()
+    thread = cq.Workplane("XZ").move(minor_diameter, 0).line(6.4, 1).line(0,2.0).line(-6.4, 1).close().sweep(path, isFrenet=True)
+
+    foot = cq.Workplane("XY").circle(28).extrude(100.0) .\
+    faces("<Z").workplane().polygon(6,92.0).extrude(30.0) .\
+    faces("<Z").workplane().hole(14.0, 42.0).translate((0,0,pitch/2.0))
+
+    foot = foot.union(thread)
+    
+    return foot
+
+def track_supports():
+
+    platform =(
+    cq.Workplane("XY")
+    .box(800,500,4)
+    ) 
+    assy = (
+        cq.Assembly()
+        .add(platform, name = "platform", color = cq.Color("tan4"))
+        .add(bolt(), name =  "bolt1", loc = cq.Location(320,180,23), color = cq.Color("tan4"))
+        .add(bolt(), name =  "bolt2",loc = cq.Location(-320,180,23), color = cq.Color("tan4"))
+        .add(bolt(), name =  "bolt3",loc = cq.Location(320,-180,23), color = cq.Color("tan4"))
+        .add(bolt(), name =  "bolt4",loc = cq.Location(-320,-180,23), color = cq.Color("tan4"))
+        )
+    
+    
+    
+    return assy
+
+
+
+def train_tracks():
+    
+    train_track = (
+    cq.Workplane("XY")
+    .box(360,22000,450)
+    .edges("|Y")  # edges parallel to X (horizontal in front/back)
+    .filter(lambda e: e.startPoint().z > 9.9)
+    .fillet(90)
+    )
+    
+    tracks = (
+    cq.Assembly()
+    .add(train_track,loc = cq.Location(0,0,225), color = cq.Color("tan4"))
+    .add(train_track,loc = cq.Location(3048,0,225),color = cq.Color("tan4"))
+    )
+    return tracks
+
+show_object(train_tracks())
+
+def plank():
+    vinyl_thickness = 38.1
+    plank_width = 3048
+    plank_depth = 139.7
+
+
+    plank = (
+    cq.Workplane("XY")
+    .box(plank_width, plank_depth, vinyl_thickness)
+    )
+
+    return plank
+
+# each plank is separated by roughly 50cm
+
+
+
+width = 3048       
+length = 22000     
+wire_thickness = 2
+wire_height = 1.5
+
+
+num_vertical = 151 
+
+spacing = (width - wire_thickness) / (num_vertical - 1)
+
+num_horizontal = int((length - wire_thickness) / spacing) + 1
+
+length = (num_horizontal - 1) * spacing + wire_thickness
+
+def make_horizontal_wire():
+    return cq.Workplane("XY").box(width, wire_thickness, wire_height)
+
+def make_vertical_wire():
+    return cq.Workplane("XY").box(wire_thickness, length, wire_height)
+
+mesh = cq.Assembly()
+
+# horizontal)
+for i in range(num_horizontal):
+    y_pos = -length / 2 + i * spacing
+    mesh.add(make_horizontal_wire(),
+             loc=cq.Location(cq.Vector(1524, y_pos, 410)),
+             color=cq.Color("gray"))
+
+#  vertical
+for j in range(num_vertical):
+    x_pos = -width / 2 + j * spacing
+    mesh.add(make_vertical_wire(),
+             loc=cq.Location(cq.Vector(x_pos + 1524, 0, 410)),
+             color=cq.Color("gray"))
+
+show_object(mesh)
+
+track_supp = cq.Assembly()
+
+for k in range(5):
+    track_supp.add(track_supports(),
+    loc=cq.Location(cq.Vector(0,2500 * k,0)))
+    track_supp.add(track_supports(),
+    loc=cq.Location(cq.Vector(3048,2500 * k,0)))
+    track_supp.add(track_supports(),
+    loc=cq.Location(cq.Vector(0,2500 * k * -1,0)))
+    track_supp.add(track_supports(),
+    loc=cq.Location(cq.Vector(3048,2500 * k * -1,0)))
+    
+    
+show_object(track_supp)
+
+def make_connector():
+    # the connectors at the bottom of the antenna
+    base_cyl_radius = 5
+    base_cyl_height = 5
+    base_cyl_wall_thickness = 2
+
+    cyl = (
+    cq.Workplane("XY")
+    .circle(base_cyl_radius)
+    .extrude(base_cyl_height)
+    )
+
+    base_cyl = (
+    cyl.faces(">Z or <Z")  #faces positive Z dir and negative Z dir
+    .shell(-base_cyl_wall_thickness) #shell out 1mm
+    )
+
+    width_c = 40
+    depth_c = 5
+    height_c = 12
+
+    connector =(
+    cq.Workplane("XY")
+    .box(height_c, width_c, depth_c)
+    )
+    
+    base_assy = cq.Assembly()
+  
+    base_assy.add(connector, name = "rect", color = cq.Color("gray59"))
+    base_assy.add(
+        base_cyl,
+        name="cyl1",
+        color=cq.Color("gray59"),
+        loc=cq.Location(-height_c*0.8, (width_c / 2)*0.91, -base_cyl_height / 2),
+    
+    )
+
+    base_assy.add(
+        base_cyl,
+        name="cyl2",
+        color=cq.Color("gray59"),
+        loc=cq.Location(height_c*0.8, (width_c / 2)*0.91, -base_cyl_height / 2),
+
+    )
+    
+    return base_assy
+
+def make_arch_door(wall, length, width, height, floor_height):
+    bottom = wall.faces("-Z").val()
+
+    #initial box shape
+    cutout = (cq.Workplane(bottom.Center())
+              .box(length, width, height)
+              .translate((0, 0, (height/2)+floor_height))
+              )
+
+    # fillet top edges to make archway
+    cutout = cutout.faces("Z").edges("Y").fillet((length/2)-0.05)
+
+    return wall.cut(cutout)
+
+def make_tunneled_cyl():
+    
+    outer_radius = 20.5   
+    height = 60  
+    #make the cylinder
+    cyla = (
+    cq.Workplane("XY")
+    .circle(outer_radius)
+    .extrude(height)
+    )
+    arch_length = outer_radius * 0.8      
+    arch_width = outer_radius * 2.2       
+    arch_height = height * 0.4            
+    floor_height = 0
+
+    cyl_with_tunnel = make_arch_door(cyla, arch_length, arch_width, arch_height, floor_height)
+    
+    return cyl_with_tunnel
+
+
+
+def make_base():
+    # 4 connectors and archtunnel
+    final_assy = cq.Assembly()
+    final_assy.add(make_connector(), loc=cq.Location(cq.Vector(-40,0,2.5), cq.Vector(0,0,1), 90), name="base_rotated1")
+    final_assy.add(make_connector(), loc=cq.Location(cq.Vector(0,-40,2.5), cq.Vector(0,0,1), 180), name="base_rotated2")
+    final_assy.add(make_connector(), loc=cq.Location(cq.Vector(40,0,2.5), cq.Vector(0,0,1), 270), name="base_rotated3")
+    final_assy.add(make_connector(), loc=cq.Location(cq.Vector(0,40,2.5), cq.Vector(0,0,1), 0), name="base_rotated4")
+    final_assy.add(make_tunneled_cyl(), loc=cq.Location(cq.Vector(0,0,-0.2), cq.Vector(0,0,1), 45), name = "archcyl", color= cq.Color("gray59"))
+    
+    outer_radius = 17   
+    height = 70
+    
+    cyla = (
+    cq.Workplane("XY")
+    .circle(outer_radius)
+    .extrude(height)
+)
+    cylb = (
+    cq.Workplane("XY")
+    .circle(20.5)
+    .extrude(height*0.5)
+)
+    final_assy.add(cyla, loc=cq.Location(0,0,60), name = "secondcyl", color= cq.Color("gray"))
+    final_assy.add(cylb, loc=cq.Location(0,0,130), name = "thirdcyl", color= cq.Color("gray52"))
+    return final_assy
+
+def make_top():
+    box_green = (
+       cq.Workplane("XY")
+       .box(180,180,1.6)
+       )
+
+    box_white = (
+        cq.Workplane("XY")
+        .box(10,350,1.6)
+        )
+
+
+    assy_antenna_top = (
+    cq.Assembly()
+    .add(box_green, loc = cq.Location(85,85,165), name="br", color = cq.Color("green4"))
+    .add(box_green, loc = cq.Location(-85,85,165), name="bL", color = cq.Color("green4"))
+    .add(box_green, loc = cq.Location(85,-85,165), name="tr", color = cq.Color("green4"))
+    .add(box_green, loc = cq.Location(-85,-85,165), name="tl", color = cq.Color("green4"))
+    .add(box_white,loc = cq.Location(0,0,165), name = "strip", color=cq.Color("khaki"))
+    .add(box_white, loc = cq.Location(cq.Vector(0,0,165), cq.Vector(0,0,1),90), name = "strip2", color=cq.Color("khaki"))
+    )
+
+    return assy_antenna_top
+
+def make_antennae():
+    
+    assy = (
+    cq.Assembly()
+    .add(make_top())
+    .add(make_base())
+    )
+    return assy
+
+def plank_antennae():
+    
+    assy = cq.Assembly()
+    assy.add(plank(),loc=cq.Location(cq.Vector(0,0, 220)), color = cq.Color("navajowhite4"))
+    n = 6
+    plank_w = 3048
+    box_w = 360
+    gap = (plank_w - n*box_w) / (n + 1)
+    spacing = box_w + gap  # center-to-center spacing
+
+    init_x = -plank_w/2 + gap + box_w/2
+    for i in range(n):
+        x = init_x + i * spacing
+        assy.add(make_antennae(), loc=cq.Location(cq.Vector(x,0,240)))
+    return assy
+
+
+
+series = cq.Assembly()
+
+for i in range(43):
+    y_pos = i * 500
+    
+    series.add(plank_antennae(),loc=cq.Location(cq.Vector(1524, (y_pos-10500), 210)))
+ 
+show_object(series)
