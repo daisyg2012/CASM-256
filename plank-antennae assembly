@@ -1,0 +1,185 @@
+import cadquery as cq
+
+def plank():
+    vinyl_thickness = 38.1
+    plank_width = 3048
+    plank_depth = 139.7
+
+
+    plank = (
+    cq.Workplane("XY")
+    .box(plank_width, plank_depth, vinyl_thickness)
+    )
+
+    return plank
+
+# each plank is separated by roughly 50cm
+
+#plank_series = cq.Assembly()
+
+#for i in range(43):
+    #y_pos = i * 500
+    
+    #plank_series.add(plank(),loc=cq.Location(cq.Vector(1524, (y_pos-10500), 470)), color = cq.Color("navajowhite4"))
+    
+#show_object(plank_series)
+
+
+def make_connector():
+    # the connectors at the bottom of the antenna
+    base_cyl_radius = 5
+    base_cyl_height = 5
+    base_cyl_wall_thickness = 2
+
+    cyl = (
+    cq.Workplane("XY")
+    .circle(base_cyl_radius)
+    .extrude(base_cyl_height)
+    )
+
+    base_cyl = (
+    cyl.faces(">Z or <Z")  #faces positive Z dir and negative Z dir
+    .shell(-base_cyl_wall_thickness) #shell out 1mm
+    )
+
+    width_c = 40
+    depth_c = 5
+    height_c = 12
+
+    connector =(
+    cq.Workplane("XY")
+    .box(height_c, width_c, depth_c)
+    )
+    
+    base_assy = cq.Assembly()
+  
+    base_assy.add(connector, name = "rect", color = cq.Color("gray59"))
+    base_assy.add(
+        base_cyl,
+        name="cyl1",
+        color=cq.Color("gray59"),
+        loc=cq.Location(-height_c*0.8, (width_c / 2)*0.91, -base_cyl_height / 2),
+    
+    )
+
+    base_assy.add(
+        base_cyl,
+        name="cyl2",
+        color=cq.Color("gray59"),
+        loc=cq.Location(height_c*0.8, (width_c / 2)*0.91, -base_cyl_height / 2),
+
+    )
+    
+    return base_assy
+
+def make_arch_door(wall, length, width, height, floor_height):
+    bottom = wall.faces("-Z").val()
+
+    #initial box shape
+    cutout = (cq.Workplane(bottom.Center())
+              .box(length, width, height)
+              .translate((0, 0, (height/2)+floor_height))
+              )
+
+    # fillet top edges to make archway
+    cutout = cutout.faces("Z").edges("Y").fillet((length/2)-0.05)
+
+    return wall.cut(cutout)
+
+def make_tunneled_cyl():
+    
+    outer_radius = 20.5   
+    height = 60  
+    #make the cylinder
+    cyla = (
+    cq.Workplane("XY")
+    .circle(outer_radius)
+    .extrude(height)
+    )
+    arch_length = outer_radius * 0.8      
+    arch_width = outer_radius * 2.2       
+    arch_height = height * 0.4            
+    floor_height = 0
+
+    cyl_with_tunnel = make_arch_door(cyla, arch_length, arch_width, arch_height, floor_height)
+    
+    return cyl_with_tunnel
+
+
+
+def make_base():
+    # 4 connectors and archtunnel
+    final_assy = cq.Assembly()
+    final_assy.add(make_connector(), loc=cq.Location(cq.Vector(-40,0,2.5), cq.Vector(0,0,1), 90), name="base_rotated1")
+    final_assy.add(make_connector(), loc=cq.Location(cq.Vector(0,-40,2.5), cq.Vector(0,0,1), 180), name="base_rotated2")
+    final_assy.add(make_connector(), loc=cq.Location(cq.Vector(40,0,2.5), cq.Vector(0,0,1), 270), name="base_rotated3")
+    final_assy.add(make_connector(), loc=cq.Location(cq.Vector(0,40,2.5), cq.Vector(0,0,1), 0), name="base_rotated4")
+    final_assy.add(make_tunneled_cyl(), loc=cq.Location(cq.Vector(0,0,-0.2), cq.Vector(0,0,1), 45), name = "archcyl", color= cq.Color("gray59"))
+    
+    outer_radius = 17   
+    height = 70
+    
+    cyla = (
+    cq.Workplane("XY")
+    .circle(outer_radius)
+    .extrude(height)
+)
+    cylb = (
+    cq.Workplane("XY")
+    .circle(20.5)
+    .extrude(height*0.5)
+)
+    final_assy.add(cyla, loc=cq.Location(0,0,60), name = "secondcyl", color= cq.Color("gray"))
+    final_assy.add(cylb, loc=cq.Location(0,0,130), name = "thirdcyl", color= cq.Color("gray52"))
+    return final_assy
+
+def make_top():
+    box_green = (
+       cq.Workplane("XY")
+       .box(180,180,1.6)
+       )
+
+    box_white = (
+        cq.Workplane("XY")
+        .box(10,350,1.6)
+        )
+
+
+    assy_antenna_top = (
+    cq.Assembly()
+    .add(box_green, loc = cq.Location(85,85,165), name="br", color = cq.Color("green4"))
+    .add(box_green, loc = cq.Location(-85,85,165), name="bL", color = cq.Color("green4"))
+    .add(box_green, loc = cq.Location(85,-85,165), name="tr", color = cq.Color("green4"))
+    .add(box_green, loc = cq.Location(-85,-85,165), name="tl", color = cq.Color("green4"))
+    .add(box_white,loc = cq.Location(0,0,165), name = "strip", color=cq.Color("khaki"))
+    .add(box_white, loc = cq.Location(cq.Vector(0,0,165), cq.Vector(0,0,1),90), name = "strip2", color=cq.Color("khaki"))
+    )
+
+    return assy_antenna_top
+
+def make_antennae():
+    
+    assy = (
+    cq.Assembly()
+    .add(make_top())
+    .add(make_base())
+    )
+    return assy
+
+def plank_antennae():
+    
+    assy = cq.Assembly()
+    assy.add(plank(),loc=cq.Location(cq.Vector(0,0, 470)), color = cq.Color("navajowhite4"))
+    n = 6
+    plank_w = 3048
+    box_w = 360
+    gap = (plank_w - n*box_w) / (n + 1)
+    spacing = box_w + gap  # center-to-center spacing
+
+    init_x = -plank_w/2 + gap + box_w/2
+    for i in range(n):
+        x = init_x + i * spacing
+        assy.add(make_antennae(), loc=cq.Location(cq.Vector(x,0,490)))
+    return assy
+
+show_object(plank_antennae())
