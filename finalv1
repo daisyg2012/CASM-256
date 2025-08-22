@@ -252,16 +252,16 @@ def make_top():
 
     box_white = (
         cq.Workplane("XY")
-        .box(10,350,1.6)
+        .box(10,370,1.6)
         )
 
 
     assy_antenna_top = (
     cq.Assembly()
-    .add(box_green, loc = cq.Location(85,85,165), name="br", color = cq.Color("green4"))
-    .add(box_green, loc = cq.Location(-85,85,165), name="bL", color = cq.Color("green4"))
-    .add(box_green, loc = cq.Location(85,-85,165), name="tr", color = cq.Color("green4"))
-    .add(box_green, loc = cq.Location(-85,-85,165), name="tl", color = cq.Color("green4"))
+    .add(box_green, loc = cq.Location(95,95,165), name="br", color = cq.Color("green4"))
+    .add(box_green, loc = cq.Location(-95,95,165), name="bL", color = cq.Color("green4"))
+    .add(box_green, loc = cq.Location(95,-95,165), name="tr", color = cq.Color("green4"))
+    .add(box_green, loc = cq.Location(-95,-95,165), name="tl", color = cq.Color("green4"))
     .add(box_white,loc = cq.Location(0,0,165), name = "strip", color=cq.Color("khaki"))
     .add(box_white, loc = cq.Location(cq.Vector(0,0,165), cq.Vector(0,0,1),90), name = "strip2", color=cq.Color("khaki"))
     )
@@ -276,6 +276,7 @@ def make_antennae():
     .add(make_base())
     )
     return assy
+
 
 def plank_antennae():
     
