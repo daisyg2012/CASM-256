@@ -95,8 +95,6 @@ spacing = (width - wire_thickness) / (num_vertical - 1)
 
 num_horizontal = int((length - wire_thickness) / spacing) + 1
 
-length = (num_horizontal - 1) * spacing + wire_thickness
-
 def make_horizontal_wire():
     return cq.Workplane("XY").box(width, wire_thickness, wire_height)
 
