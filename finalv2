@@ -239,29 +239,18 @@ def make_base():
     .extrude(height*0.5)
 )
     final_assy.add(cyla, loc=cq.Location(0,0,60), name = "secondcyl", color= cq.Color("gray"))
-    final_assy.add(cylb, loc=cq.Location(0,0,130), name = "thirdcyl", color= cq.Color("gray52"))
+    final_assy.add(cylb, loc=cq.Location(0,0,129), name = "thirdcyl", color= cq.Color("gray52"))
     return final_assy
 
 def make_top():
-    box_green = (
-       cq.Workplane("XY")
-       .box(170,170,1.6)
-       )
-
     box_white = (
-        cq.Workplane("XY")
-        .box(10,350,1.6)
-        )
-
+       cq.Workplane("XY")
+       .box(360,360,1.6)
+       )
 
     assy_antenna_top = (
     cq.Assembly()
-    .add(box_green, loc = cq.Location(90,90,165), name="br", color = cq.Color("ghostwhite"))
-    .add(box_green, loc = cq.Location(-90,90,165), name="bL", color = cq.Color("ghostwhite"))
-    .add(box_green, loc = cq.Location(90,-90,165), name="tr", color = cq.Color("ghostwhite"))
-    .add(box_green, loc = cq.Location(-90,-90,165), name="tl", color = cq.Color("ghostwhite"))
-    .add(box_white,loc = cq.Location(0,0,165), name = "strip", color=cq.Color("ghostwhite"))
-    .add(box_white, loc = cq.Location(cq.Vector(0,0,165), cq.Vector(0,0,1),90), name = "strip2", color=cq.Color("ghostwhite"))
+    .add(box_white, loc = cq.Location(0,0,165), name="br", color = cq.Color("ghostwhite"))
     )
 
     return assy_antenna_top
@@ -274,8 +263,6 @@ def make_antennae():
     .add(make_base())
     )
     return assy
-
-
 
 def plank_antennae():
     
